@@ -1,3 +1,8 @@
+// Package xlog implements a simple logging package. It defines a type, Logger,
+// with methods for formatting output. It also has a predefined 'standard'
+// Logger accessible through helper functions which are easier to use than creating a Logger manually.
+// The Fatal functions call os.Exit(1) after writing the log message.
+// The Panic functions call panic after writing the log message.
 package xlog
 
 import (
@@ -8,6 +13,7 @@ import (
 	"time"
 )
 
+// Level used to filter log message by the Logger.
 type Level uint8
 
 // logging levels.
@@ -29,19 +35,23 @@ var level2Str = [DebugLevel + 1]string{
 	"DEBUG",
 }
 
+// A Logger represents an active logging object that generates lines of
+// output to log listeners. A Logger can be used simultaneously from
+// multiple goroutines; it guarantees to serialize access to the Writer.
 type Logger struct {
 	mu        sync.Mutex // ensures atomic writes; protects the following fields
-	Name      string
-	lev       Level
-	lis       []Listener
-	layouters []Layouter
-	buf       []byte // for accumulating text to write
+	name      string     // logger name
+	lev       Level      // log level
+	lis       []Listener // log listeners
+	layouters []Layouter // log layouters
+	buf       []byte     // for accumulating text to write
 }
 
-func New(n string, l Level, lis Listener, layout string) *Logger {
+// New creates a new Logger.
+func New(name string, lev Level, lis Listener, layout string) *Logger {
 	logger := &Logger{
-		Name: n,
-		lev:  l,
+		name: name,
+		lev:  lev,
 		lis:  []Listener{lis},
 	}
 	logger.SetLayout(layout)
@@ -50,6 +60,7 @@ func New(n string, l Level, lis Listener, layout string) *Logger {
 
 var stdLogger = New("default", InfoLevel, os.Stderr, "%L %D %T %l")
 
+// SetLayout set the layout of log message.
 func (l *Logger) SetLayout(layout string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -82,6 +93,7 @@ func (l *Logger) SetLayout(layout string) {
 	}
 }
 
+// AddListener add a listener to the Logger, return true if add success, otherwise return false.
 func (l *Logger) AddListener(lis Listener) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -99,6 +111,7 @@ func (l *Logger) AddListener(lis Listener) bool {
 	return true
 }
 
+// RemoveListener remove a listener from the Logger, return true if remove success, otherwise return false.
 func (l *Logger) RemoveListener(lis Listener) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -112,57 +125,86 @@ func (l *Logger) RemoveListener(lis Listener) bool {
 	return false
 }
 
+// Panic print a PanicLevel message to the logger followed by a call to panic().
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	l.Log(PanicLevel, s)
 	panic(s)
 }
+
+// Panicf print a PanicLevel message to the logger followed by a call to panic().
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Panicf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	l.Log(PanicLevel, s)
 	panic(s)
 }
+
+// Fatal print a FatalLevel message to the logger followed by a call to os.Exit(1).
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Fatal(v ...interface{}) {
 	l.Log(FatalLevel, v...)
-	l.mu.Lock()
-	if l.lev >= FatalLevel {
-		l.mu.Unlock()
-		os.Exit(1)
-	}
+	os.Exit(1)
 }
+
+// Fatalf print a FatalLevel message to the logger followed by a call to os.Exit(1).
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Fatalf(format string, v ...interface{}) {
 	l.Logf(FatalLevel, format, v...)
-
-	l.mu.Lock()
-	if l.lev >= FatalLevel {
-		l.mu.Unlock()
-		os.Exit(1)
-	}
+	os.Exit(1)
 }
+
+// Error print a ErrorLevel message to the logger.
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Error(v ...interface{}) {
 	l.Log(ErrorLevel, v...)
 }
+
+// Errorf print a ErrorLevel message to the logger.
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	l.Logf(ErrorLevel, format, v...)
 }
+
+// Warn print a WarnLevel message to the logger.
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Warn(v ...interface{}) {
 	l.Log(WarnLevel, v...)
 }
+
+// Warnf print a WarnLevel message to the logger.
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Warnf(format string, v ...interface{}) {
 	l.Logf(WarnLevel, format, v...)
 }
+
+// Info print a InfoLevel message to the logger.
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Info(v ...interface{}) {
 	l.Log(InfoLevel, v...)
 }
+
+// Infof print a InfoLevel message to the logger.
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Infof(format string, v ...interface{}) {
 	l.Logf(InfoLevel, format, v...)
 }
+
+// Debug print a DebugLevel message to the logger.
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Debug(v ...interface{}) {
 	l.Log(DebugLevel, v...)
 }
+
+// Debugf print a DebugLevel message to the logger.
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	l.Logf(DebugLevel, format, v...)
 }
+
+// Log print a leveled message to the logger.
+// Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Log(level Level, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -183,6 +225,9 @@ func (l *Logger) Log(level Level, v ...interface{}) {
 		}
 	}
 }
+
+// Logf print a leveled message to the logger.
+// Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Logf(level Level, format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
