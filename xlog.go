@@ -1,8 +1,8 @@
 // Package xlog implements a simple logging package. It defines a type, Logger,
 // with methods for formatting output. It also has a predefined 'standard'
 // Logger accessible through helper functions which are easier to use than creating a Logger manually.
-// The Fatal functions call os.Exit(1) after writing the log message.
-// The Panic functions call panic after writing the log message.
+// The Fatal[f] functions call os.Exit(1) after writing the log message.
+// The Panic[f] functions call panic after writing the log message.
 package xlog
 
 import (
@@ -58,10 +58,15 @@ func New(name string, lev Level, lis Listener, layout string) *Logger {
 	return logger
 }
 
-var stdLogger = New("default", InfoLevel, os.Stderr, "%L %D %T %l")
+var stdLogger = New("default", InfoLevel, os.Stderr, "")
 
 // SetLayout set the layout of log message.
+// will use '%L %D %T %l' by default if layout parameter if empty.
+// see Layouter for detail.
 func (l *Logger) SetLayout(layout string) {
+	if len(layout) == 0 {
+		layout = "%L %D %T %l"
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	for {
@@ -103,9 +108,6 @@ func (l *Logger) AddListener(lis Listener) bool {
 		}
 	}
 
-	if l.lis == nil {
-		l.lis = make([]Listener, 0, 1)
-	}
 	l.lis = append(l.lis, lis)
 
 	return true
@@ -249,48 +251,87 @@ func (l *Logger) Logf(level Level, format string, v ...interface{}) {
 	}
 }
 
+// SetLayout is equivalent to Logger.SetLayout.
 func SetLayout(layout string) {
 	stdLogger.SetLayout(layout)
 }
+
+// AddListener is equivalent to Logger.AddListener.
 func AddListener(lis Listener) bool {
 	return stdLogger.AddListener(lis)
 }
+
+// RemoveListener is equivalent to Logger.RemoveListener.
 func RemoveListener(lis Listener) bool {
 	return stdLogger.RemoveListener(lis)
 }
+
+// Panic is equivalent to Logger.Panic.
 func Panic(v ...interface{}) {
 	stdLogger.Panic(v...)
 }
+
+// Panicf is equivalent to Logger.Panicf.
 func Panicf(format string, v ...interface{}) {
 	stdLogger.Panicf(format, v...)
 }
+
+// Fatal is equivalent to Logger.Fatal.
 func Fatal(v ...interface{}) {
 	stdLogger.Fatal(v...)
 }
+
+// Fatalf is equivalent to Logger.Fatalf.
 func Fatalf(format string, v ...interface{}) {
 	stdLogger.Fatalf(format, v...)
 }
+
+// Error is equivalent to Logger.Error.
 func Error(v ...interface{}) {
 	stdLogger.Log(ErrorLevel, v...)
 }
+
+// Errorf is equivalent to Logger.Errorf.
 func Errorf(format string, v ...interface{}) {
 	stdLogger.Logf(ErrorLevel, format, v...)
 }
+
+// Warn is equivalent to Logger.Warn.
 func Warn(v ...interface{}) {
 	stdLogger.Log(WarnLevel, v...)
 }
+
+// Warnf is equivalent to Logger.Warnf.
 func Warnf(format string, v ...interface{}) {
 	stdLogger.Logf(WarnLevel, format, v...)
 }
+
+// Info is equivalent to Logger.Info.
 func Info(v ...interface{}) {
 	stdLogger.Log(InfoLevel, v...)
 }
+
+// Infof is equivalent to Logger.Infof.
 func Infof(format string, v ...interface{}) {
 	stdLogger.Logf(InfoLevel, format, v...)
 }
+
+// Debug is equivalent to Logger.Debug.
 func Debug(v ...interface{}) {
 	stdLogger.Log(DebugLevel, v...)
 }
+
+// Debugf is equivalent to Logger.Debugf.
 func Debugf(format string, v ...interface{}) {
 	stdLogger.Logf(DebugLevel, format, v...)
+}
+
+// Log is equivalent to Logger.Log.
+func Log(level Level, v ...interface{}) {
+	stdLogger.Log(level, v...)
+}
+
+// Logf is equivalent to Logger.Logf.
+func Logf(level Level, format string, v ...interface{}) {
+	stdLogger.Logf(level, format, v...)
 }

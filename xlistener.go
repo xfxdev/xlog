@@ -9,21 +9,28 @@ import (
 	"time"
 )
 
+// A Listener simple typed of io.Writer
 type Listener io.Writer
 
+// W2FileListener use to output log to file.
 type W2FileListener struct {
 	f *os.File
 }
 
+// Write is equivalent to os.File.Write.
 func (l *W2FileListener) Write(p []byte) (n int, err error) {
 	return l.f.Write(p)
 }
+
+// Close is equivalent to os.File.Close.
 func (l *W2FileListener) Close() error {
 	if l != nil && l.f != nil {
 		return l.f.Close()
 	}
 	return os.ErrInvalid
 }
+
+// NewW2FileListener creates a new W2FileListener.
 func NewW2FileListener(filePath string) (*W2FileListener, error) {
 	if len(filePath) == 0 {
 		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))

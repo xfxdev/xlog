@@ -4,24 +4,20 @@ import (
 	"time"
 )
 
-/*
-   %y : year
-   %M : month
-   %d : day
-   %h : hour
-   %m : min
-   %s : second
-
-   %n : logger name
-   %l : log msg
-   %L : log level
-   %f : file
-   %i : line
-
-   %D : %y/%M/%d
-   %T : %h:%m:%s
-*/
-// %y/%M/%d %h:%m:%s
+// Layouter used to format log message.
+//   %y : year
+//   %M : month
+//   %d : day
+//   %h : hour
+//   %m : min
+//   %s : second
+//   %n : logger name
+//   %l : log msg
+//   %L : log level
+//   %f : file
+//   %i : line
+//   %D : %y/%M/%d
+//   %T : %h:%m:%s
 type Layouter interface {
 	layout(buf *[]byte, lev Level, msg string, t time.Time, file string, line int)
 }
