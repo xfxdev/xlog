@@ -2,6 +2,7 @@
 plugin architecture and flexible log system for golang
 
 [![GoDoc](https://godoc.org/github.com/xfxdev/xlog?status.svg)](https://godoc.org/github.com/xfxdev/xlog)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xfxdev/xlog)](https://goreportcard.com/report/github.com/xfxdev/xlog)
 
 Installation
 ================
