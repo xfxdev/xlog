@@ -31,6 +31,7 @@ func (l *W2FileListener) Close() error {
 }
 
 // NewW2FileListener creates a new W2FileListener.
+// If filePath is empty, then will create file at appPath/Log/
 func NewW2FileListener(filePath string) (*W2FileListener, error) {
 	if len(filePath) == 0 {
 		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
