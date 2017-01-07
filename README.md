@@ -17,6 +17,14 @@ if suc == false {
 }
 xlog.SetLevel(logLevel)
 
+// write log to file.
+w2f, err := xlog.NewW2FileListener("")
+if err != nil {
+    xlog.Fatal(err)
+} else {
+    xlog.AddListener(w2f)
+}
+
 xlog.Info("server start...")
 xlog.Debugf("ip : %v", "127.0.0.1")
 ~~~
