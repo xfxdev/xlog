@@ -7,7 +7,7 @@ Usage
 ================
 ~~~
 import (
-    "github.com/xfxdev/xtcp"
+    "github.com/xfxdev/xlog"
 )
 
 strLogLevel := "INFO"  // also maybe read form config.
