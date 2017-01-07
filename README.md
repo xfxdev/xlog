@@ -9,6 +9,16 @@ Usage
 import (
     "github.com/xfxdev/xtcp"
 )
+
+strLogLevel := "INFO"  // also maybe read form config.
+logLevel, suc := xlog.ParseLevel(strLogLevel)
+if suc == false {
+    // failed to parse log level, will use the default level[INFO] instead."
+}
+xlog.SetLevel(logLevel)
+
+xlog.Info("server start...")
+xlog.Debugf("ip : %v", "127.0.0.1")
 ~~~
 
 Features
