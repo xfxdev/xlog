@@ -60,14 +60,18 @@ xlog provide some builtin layout:
 ~~~
 You can use a combination of them, for example:
 ~~~
-xlog.SetLayout("%L %D %T %l")
 // this mean every log message will have a '[level] year/month/day hour:min:sec' perfix, eg:
+xlog.SetLayout("%L %D %T %l")
+
+// outputs:
 [INFO] 2016/01/01 13:27:07 net start...
 [WARN] 2016/01/01 13:28:00 ...
 [DEBUG] 2016/01/01 13:28:00 accept...
 
 // add filename and line to log message.
 xlog.SetLayout("%L %D %T %f(%i) %l")
+
+// outputs:
 [INFO] 2016/01/01 13:27:07 [test.go:(72)] net start...
 [WARN] 2016/01/01 13:28:00 [test.go:(100)] ...
 [DEBUG] 2016/01/01 13:28:00 [test.go:(128)] accept...
@@ -75,6 +79,8 @@ xlog.SetLayout("%L %D %T %f(%i) %l")
 You can use any form of combination, even meaningless thing, such as more spaces, arbitrary symbols
 ~~~
 xlog.SetLayout("hahaha%L | %D   %T [ABC] %l [i'm after hahaha]")
+
+// outputs:
 // notice the prefix 'hahaha', the spaces in the middle, and the suffix '[i'm after hahaha]'
 hahaha[INFO] | 2017/01/07     14:09:47 [ABC] net start... [i'm after hahaha]
 hahaha[WARN] | 2017/01/07     14:09:47 [ABC] ... [i'm after hahaha]
@@ -88,7 +94,7 @@ xlog use listener system to output the log message.
 // A Listener simple typed of io.Writer
 type Listener io.Writer
 ~~~
-A logger can have multiple listeners, xlog have 2 builtin listener, which are os.Stderr and W2FileListener
+A logger can have multiple listeners, xlog have 2 builtin listener, which are os.Stderr and W2FileListener.
 xlog will output log to os.Stderr by default, but you can add W2FileListener to output the log the file.
 ~~~
 w2f, err := xlog.NewW2FileListener("logfilePath...")
