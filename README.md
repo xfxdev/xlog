@@ -17,7 +17,7 @@ import (
     "github.com/xfxdev/xlog"
 )
 
-strLogLevel := "INFO"  // also maybe read form config.
+strLogLevel := "INFO"  // also maybe read from config.
 logLevel, suc := xlog.ParseLevel(strLogLevel)
 if suc == false {
     // failed to parse log level, will use the default level[INFO] instead."
