@@ -1,8 +1,9 @@
 # xlog
 plugin architecture and flexible log system for golang
 
-[![GoDoc](https://godoc.org/github.com/xfxdev/xlog?status.svg)](https://godoc.org/github.com/xfxdev/xlog)
+[![Build Status](https://travis-ci.org/xfxdev/xlog.svg?branch=master)](https://travis-ci.org/xfxdev/xlog)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xfxdev/xlog)](https://goreportcard.com/report/github.com/xfxdev/xlog)
+[![GoDoc](https://godoc.org/github.com/xfxdev/xlog?status.svg)](https://godoc.org/github.com/xfxdev/xlog)
 
 Installation
 ================
