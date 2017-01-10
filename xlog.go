@@ -171,6 +171,13 @@ func (l *Logger) RemoveListener(lis Listener) bool {
 	return false
 }
 
+// RemoveAllListeners remove all listeners from the logger.
+func (l *Logger) RemoveAllListeners() {
+	l.mu.Lock()
+	l.lis = nil
+	l.mu.Unlock()
+}
+
 // Panic print a PanicLevel message to the logger followed by a call to panic().
 // Arguments are handled in the manner of fmt.Print.
 func (l *Logger) Panic(v ...interface{}) {
