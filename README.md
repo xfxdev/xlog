@@ -51,13 +51,13 @@ const (
 )
 ~~~
 
-you can call 'SetLevel' to change the log level. All the logs which level <= than you set will output.
+you can call 'SetLevel' to change the log level. All the logs which level <= your set will be output.
 for example:
 ~~~
-// all logs will output because DEBUG is the max level.
+// all logs will be output because DEBUG is the max level.
 xlog.SetLevel(xlog.DebugLevel) 
 
-// only Panic/Fatal/Error logs will output because WARN/INFO/DEBUG > ERROR.
+// only Panic/Fatal/Error logs will be output because WARN/INFO/DEBUG > ERROR.
 xlog.SetLevel(xlog.ErrorLevel)
 ~~~
 
@@ -94,14 +94,14 @@ xlog.SetLayout("%L %D %T %l")
 [DEBUG] 2016/01/01 13:28:00 accept...
 
 // add filename and line to log message.
-xlog.SetLayout("%L %D %T %f(%i) %l")
+xlog.SetLayout("%L %D %T [%f(%i)] %l")
 
 // outputs:
 [INFO] 2016/01/01 13:27:07 [test.go:(72)] net start...
 [WARN] 2016/01/01 13:28:00 [test.go:(100)] ...
 [DEBUG] 2016/01/01 13:28:00 [test.go:(128)] accept...
 ~~~
-You can use any form of combination, even meaningless thing, such as more spaces, arbitrary symbols
+You can use any form of combination, even meaningless thing, such as more spaces, arbitrary symbols:
 ~~~
 xlog.SetLayout("hahaha%L | %D   %T [ABC] %l [i'm after hahaha]")
 
@@ -113,20 +113,21 @@ hahaha[DEBUG] | 2017/01/07     14:09:47 [ABC] accept... [i'm after hahaha]
 ~~~
 NOTICE: If you doesn't call 'SetLayout', xlog will use '%L %D %T %l' by default.
 
-###Output a log to different target
+###Output a log to different targets
 xlog use listener system to output the log message.
 ~~~
 // A Listener simple typed of io.Writer
 type Listener io.Writer
 ~~~
 A logger can have multiple listeners, xlog have 2 builtin listener, which are os.Stderr and W2FileListener.
-xlog will output log to os.Stderr by default, but you can add W2FileListener to output the log the file.
+xlog will output log to os.Stderr by default, but you can add W2FileListener to output the log to file.
 ~~~
 w2f, err := xlog.NewW2FileListener("logfilePath...")
 if err != nil {
     xlog.Fatal(err)
+} else {
+    xlog.AddListener(w2f)
 }
-xlog.AddListener(w2f)
 ~~~
 In 'NewW2FileListener' function, xlog will use the 'logfilePath' to create log file,
 so please makesure your path is correct.
@@ -134,8 +135,8 @@ so please makesure your path is correct.
 os.MkdirAll(filepath.Dir(logfilePath), os.ModePerm)
 ~~~
 Also, you can give a empty path to NewW2FileListener(""), this will create log file by simple rule. for example:
-If your app current path is 'a/b/c', and your app name is 'test.go'
-Then the log file will be 'a/b/c/log/test_2016_01_01.log'
+If your app current path is 'a/b/c', and your app name is 'testapp'
+Then the log file will be 'a/b/c/log/testapp_2016_01_01.log'
 ~~~
 w2f, err := xlog.NewW2FileListener("")  // create log file at : 'a/b/c/log/test_2016_01_01.log'
 if err != nil {
