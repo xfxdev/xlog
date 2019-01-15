@@ -17,6 +17,10 @@ func (lis *strLogListener) Write(p []byte) (n int, err error) {
 	return n, nil
 }
 
+func (l *strLogListener) Close() error {
+	return nil
+}
+
 func compareInt(t *testing.T, layout Layouter, time time.Time, rv int) {
 	var buf []byte
 	layout.layout(&buf, DebugLevel, "", time, "", 0)
