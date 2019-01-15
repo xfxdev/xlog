@@ -11,6 +11,7 @@
 package xlog
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -33,7 +34,7 @@ const (
 )
 
 // Level2Str used to conver Level value to string.
-var Level2Str = [...]string{
+var Level2Str = []string{
 	"PANIC",
 	"FATAL",
 	"ERROR",
@@ -41,6 +42,8 @@ var Level2Str = [...]string{
 	"INFO",
 	"DEBUG",
 }
+
+var errUnknownLogLevel = errors.New("unknown log level")
 
 // DefaultLoggerLayout give the default log layout.
 // "%L %D %T %l" mean "[INFO] 2017/01/05 18:02:17 some log msg..."
@@ -50,8 +53,9 @@ const DefaultLoggerLayout = "%L %D %T %l"
 // ParseLevel used to parse string to Level value.
 // It will return (ParsedLevel, true) if parse successed, otherwise will return (InfoLevel, false).
 func ParseLevel(str string) (Level, bool) {
+	upper := strings.ToUpper(str)
 	for i, v := range Level2Str {
-		if v == str {
+		if v == upper {
 			return Level(i), true
 		}
 	}
@@ -81,6 +85,20 @@ func New(lev Level, lis Listener, layout string) *Logger {
 }
 
 var stdLogger = New(InfoLevel, os.Stderr, DefaultLoggerLayout)
+
+func (l *Logger) Close() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	var ret error
+	for _, li := range l.lis {
+		if err := li.Close(); err != nil {
+			if ret == nil {
+				ret = err
+			}
+		}
+	}
+	return ret
+}
 
 // SetLevel set the log level for Logger.
 func (l *Logger) SetLevel(lev Level) {
@@ -293,6 +311,15 @@ func (l *Logger) Log(level Level, msg string) {
 	}
 }
 
+func ParseAndSetLevel(lev string) error {
+	l, ok := ParseLevel(lev)
+	if !ok {
+		return errUnknownLogLevel
+	}
+	SetLevel(l)
+	return nil
+}
+
 // SetLevel is equivalent to Logger.SetLevel.
 func SetLevel(lev Level) {
 	stdLogger.SetLevel(lev)
@@ -311,6 +338,11 @@ func AddListener(lis Listener) bool {
 // RemoveListener is equivalent to Logger.RemoveListener.
 func RemoveListener(lis Listener) bool {
 	return stdLogger.RemoveListener(lis)
+}
+
+// Close is use to close the logger
+func Close() error {
+	return stdLogger.Close()
 }
 
 // Panic is equivalent to Logger.Panic.

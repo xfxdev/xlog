@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"bufio"
 	"io"
 	"os"
 	"path"
@@ -10,22 +11,29 @@ import (
 )
 
 // A Listener simple typed of io.Writer
-type Listener io.Writer
+type Listener io.WriteCloser
 
 // W2FileListener use to output log to file.
 type W2FileListener struct {
+	w *bufio.Writer
 	f *os.File
 }
 
 // Write is equivalent to os.File.Write.
 func (l *W2FileListener) Write(p []byte) (n int, err error) {
-	return l.f.Write(p)
+	return l.w.Write(p)
 }
 
 // Close is equivalent to os.File.Close.
 func (l *W2FileListener) Close() error {
 	if l != nil && l.f != nil {
-		return l.f.Close()
+		err := l.w.Flush()
+		if err2 := l.f.Close(); err2 != nil {
+			if err == nil {
+				err = err2
+			}
+		}
+		return err
 	}
 	return os.ErrInvalid
 }
@@ -56,6 +64,7 @@ func NewW2FileListener(filePath string) (*W2FileListener, error) {
 
 	lis := &W2FileListener{
 		f: f,
+		w: bufio.NewWriter(f),
 	}
 
 	return lis, nil
